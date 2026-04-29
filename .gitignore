@@ -40,3 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 test_results
+
+# local tooling / scratch
+.claude/
+.superpowers/
