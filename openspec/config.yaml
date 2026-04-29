@@ -1,20 +1,65 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+# Project context — injected into every artifact's instruction prompt.
+context: |
+  Tech stack: Next.js 16 (App Router) + React 19 + TypeScript on the Bun
+  runtime, Tailwind CSS v4 for styling, SQLite via bun:sqlite (schema
+  bootstrapped at startup in lib/db.ts — no migration tool), better-auth
+  for sessions, Tiptap 3 for rich text editing, zod for validation, and
+  isomorphic-dompurify for HTML sanitization.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  Backend tests: vitest for server-only code under lib/ (validation,
+  sanitize, content, db, auth). Plain TypeScript — no DOM. Tests live in
+  __tests__/lib/ mirroring the lib/ source layout. Run with
+  `bun run test` (watch) or `bun run test:run` (CI).
+
+  Frontend tests: vitest + @testing-library/react + jsdom for React
+  components. Setup in vitest.setup.ts wires auto-cleanup and jest-dom
+  matchers. Tests live in __tests__/components/ mirroring components/.
+  Same `bun run test` / `bun run test:run` commands.
+
+  Conventions:
+    - Next.js App Router under app/. Server Components by default; add
+      'use client' only when interactivity requires it (forms, editor, etc.).
+    - Co-locate route, server actions, and forms in the same folder
+      (e.g., app/notes/[id]/edit/{page.tsx,actions.ts,edit-note-form.tsx}).
+    - Component and route filenames use kebab-case
+      (rich-text-editor.tsx, not RichTextEditor.tsx).
+    - Use the @/ path alias (configured via tsconfig + vite-tsconfig-paths)
+      for imports from the project root.
+    - Tailwind v4 semantic tokens — prefer text-foreground/60,
+      border-border, etc. over raw color classes.
+    - Lint with `bun run lint` (eslint + eslint-config-next);
+      format with `bun run format` (oxfmt).
+    - Validate inputs at boundaries with zod; sanitize HTML with
+      isomorphic-dompurify before persisting or rendering.
+
+  Superpowers integration:
+    - This project pairs OpenSpec with Anthropic superpowers skills.
+    - /opsx:propose triggers superpowers:brainstorming BEFORE artifact
+      generation (see .claude/commands/opsx/propose.md).
+    - /opsx:apply runs superpowers:test-driven-development at session
+      start, superpowers:subagent-driven-development to delegate
+      implementation work to subagents, and superpowers:requesting-code-review
+      at task-group checkpoints (see .claude/commands/opsx/apply.md).
+    - tasks.md MUST scaffold TDD discipline + review checkpoints so the
+      apply phase has the hooks it needs.
+
+# Per-artifact rules — appended to artifact-specific instructions.
+# Each rule must be a quoted scalar to avoid YAML multi-line ambiguity.
+rules:
+  proposal:
+    - "Always include a Non-Goals (or Out-of-Scope) section."
+    - "Capabilities section MUST list which existing capability is modified. Look in openspec/specs/ first; do not invent capability names."
+    - "If the change has visual/UX surface, mention that brainstorming has already produced a design spec under docs/superpowers/specs/."
+
+  design:
+    - "Reference the brainstorming spec doc under docs/superpowers/specs/ as a primary input when one exists for this change."
+    - "Decisions section MUST cover alternatives considered, not just the choice made."
+
+  tasks:
+    - "Each implementation task that introduces NEW behavior MUST be preceded by a RED-failing-test task. Pattern: '- [ ] N.X RED — write failing test for <behavior>' followed by '- [ ] N.X+1 GREEN — minimal impl to pass the test'. Use vitest + @testing-library/react for components and vitest for server-only lib code."
+    - "Bug fixes MUST be preceded by a regression test that reproduces the bug (RED), then the fix (GREEN)."
+    - "Each '## N' task group MUST end with a checkpoint task: '- [ ] N.Z Run superpowers:requesting-code-review on the diff for group N; address CRITICAL/HIGH findings before moving on'."
+    - "The final task group MUST include a verification task: '- [ ] M.K Run superpowers:verification-before-completion (bun run test:run + grep for console.log + diff review)'."
+    - "Tasks SHOULD explicitly name the superpowers skill to invoke when relevant (e.g., 'Invoke superpowers:test-driven-development to scaffold tests for the new service method')."
