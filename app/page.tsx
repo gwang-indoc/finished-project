@@ -3,7 +3,7 @@ import Link from 'next/link';
 export default function Home() {
   return (
     <div className='relative flex min-h-screen items-center justify-center p-8'>
-      <div className='absolute top-4 right-6'>
+      <div className='absolute right-6 bottom-4'>
         <Link
           href='/help'
           className='inline-flex items-center gap-1.5 text-sm text-foreground/60 hover:text-foreground'
