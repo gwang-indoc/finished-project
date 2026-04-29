@@ -2,7 +2,18 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className='flex min-h-screen items-center justify-center p-8'>
+    <div className='relative flex min-h-screen items-center justify-center p-8'>
+      <div className='absolute top-4 right-6'>
+        <Link
+          href='/help'
+          className='inline-flex items-center gap-1.5 text-sm text-foreground/60 hover:text-foreground'
+        >
+          <span className='inline-flex h-4 w-4 items-center justify-center rounded-full border border-foreground/40 text-[10px] font-bold'>
+            ?
+          </span>
+          Help
+        </Link>
+      </div>
       <main className='max-w-md text-center'>
         <h1 className='text-4xl font-bold mb-4'>Welcome to Notes</h1>
         <p className='text-foreground/60 mb-8'>
