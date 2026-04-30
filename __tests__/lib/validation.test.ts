@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { createNoteSchema, updateNoteSchema, toggleSharingSchema } from '@/lib/validation';
+import {
+  createNoteSchema,
+  updateNoteSchema,
+  toggleSharingSchema,
+  removeAccountSchema,
+} from '@/lib/validation';
 
 describe('createNoteSchema', () => {
   it('passes with valid title and content', () => {
@@ -63,6 +68,40 @@ describe('updateNoteSchema', () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.flatten().fieldErrors.id).toContain('Invalid note ID');
+    }
+  });
+});
+
+describe('removeAccountSchema', () => {
+  it('passes with a valid email', () => {
+    const result = removeAccountSchema.safeParse({ confirmEmail: 'user@example.com' });
+    expect(result.success).toBe(true);
+  });
+
+  it('fails when confirmEmail is missing', () => {
+    const result = removeAccountSchema.safeParse({});
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.confirmEmail).toBeDefined();
+    }
+  });
+
+  it('fails when confirmEmail is not an email', () => {
+    const result = removeAccountSchema.safeParse({ confirmEmail: 'not-an-email' });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.confirmEmail).toBeDefined();
+    }
+  });
+
+  it('fails when confirmEmail exceeds 254 chars', () => {
+    const local = 'a'.repeat(244);
+    const oversized = `${local}@example.com`;
+    expect(oversized.length).toBeGreaterThan(254);
+    const result = removeAccountSchema.safeParse({ confirmEmail: oversized });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.confirmEmail).toBeDefined();
     }
   });
 });

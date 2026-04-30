@@ -15,3 +15,7 @@ export const toggleSharingSchema = z.object({
   noteId: z.string(),
   enable: z.enum(['true', 'false']).transform((v) => v === 'true'),
 });
+
+export const removeAccountSchema = z.object({
+  confirmEmail: z.string().email('Invalid email').max(254, 'Email is too long'),
+});

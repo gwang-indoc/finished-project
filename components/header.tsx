@@ -18,20 +18,28 @@ export function Header({ user }: HeaderProps) {
         NextNotes
       </Link>
       {user && (
-        <button
-          onClick={() =>
-            signOut({
-              fetchOptions: {
-                onSuccess: () => {
-                  window.location.href = '/';
+        <div className='flex items-center gap-4'>
+          <Link
+            href='/settings'
+            className='text-sm text-foreground/60 hover:text-foreground'
+          >
+            Settings
+          </Link>
+          <button
+            onClick={() =>
+              signOut({
+                fetchOptions: {
+                  onSuccess: () => {
+                    window.location.href = '/';
+                  },
                 },
-              },
-            })
-          }
-          className='text-sm text-foreground/60 hover:text-foreground cursor-pointer'
-        >
-          Logout
-        </button>
+              })
+            }
+            className='text-sm text-foreground/60 hover:text-foreground cursor-pointer'
+          >
+            Logout
+          </button>
+        </div>
       )}
     </header>
   );
