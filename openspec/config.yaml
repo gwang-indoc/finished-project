@@ -34,7 +34,17 @@ context: |
     - Validate inputs at boundaries with zod; sanitize HTML with
       isomorphic-dompurify before persisting or rendering.
 
-/
+  Superpowers integration:
+    - This project pairs OpenSpec with Anthropic superpowers skills.
+    - /opsx:propose triggers superpowers:brainstorming BEFORE artifact
+      generation (see .claude/commands/opsx/propose.md).
+    - /opsx:apply runs superpowers:test-driven-development at session
+      start, superpowers:subagent-driven-development to delegate
+      implementation work to subagents, and superpowers:requesting-code-review
+      at task-group checkpoints (see .claude/commands/opsx/apply.md).
+    - tasks.md MUST scaffold TDD discipline + review checkpoints so the
+      apply phase has the hooks it needs.
+
 
 # Per-artifact rules — appended to artifact-specific instructions.
 # Each rule must be a quoted scalar to avoid YAML multi-line ambiguity.
