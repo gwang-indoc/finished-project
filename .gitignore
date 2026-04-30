@@ -43,5 +43,4 @@ test_results
 
 # local tooling / scratch
 .claude/
-.superpowers/
 .idea/

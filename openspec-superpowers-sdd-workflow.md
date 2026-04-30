@@ -90,7 +90,7 @@ In one sentence: **OpenSpec manages the spec lifecycle, while Superpowers manage
    Do not expect either tool to do both jobs well.
 
 4. **Every mistake should go into `config.yaml`.**  
-   The over-refactor from Batch 6 is now a prevention rule. That is the compounding advantage of SDD over vibe coding: mistakes become structure instead of being buried only in Git history.
+   The over-refactor from Batch is now a prevention rule. That is the compounding advantage of SDD over vibe coding: mistakes become structure instead of being buried only in Git history.
 
 5. **Keep a daily log.**  
    The habit of writing `docs/log/YYYY-MM-DD.md` makes retrospectives very cheap. It also becomes the source material for updating `CLAUDE.md` and `config.yaml`.
