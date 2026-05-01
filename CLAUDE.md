@@ -53,7 +53,7 @@ Next.js 16 App Router on Bun, with React 19, Tailwind v4, SQLite (`bun:sqlite`),
 This project uses OpenSpec + Anthropic Superpowers skills together. The integration is configured in `openspec/config.yaml` and the slash commands in `.claude/commands/opsx/`:
 
 - **`/opsx:propose`** runs `superpowers:brainstorming` first, then generates `proposal.md`, `design.md`, and `tasks.md` under `openspec/changes/<id>/`. UI-bearing proposals must reference a brainstorming spec under `docs/superpowers/specs/`.
-- **`/opsx:apply`** runs `superpowers:test-driven-development` (RED → GREEN), delegates batches via `superpowers:subagent-driven-development`, and runs `superpowers:requesting-code-review` at task-group checkpoints.
+- **`/opsx:apply`** runs `superpowers:test-driven-development` (RED → GREEN), delegates `[parallel]` units via `superpowers:subagent-driven-development` (fresh subagent per task with a two-stage review — spec compliance, then code quality), and runs `superpowers:requesting-code-review` at task-group checkpoints.
 - **`/opsx:archive`** merges the delta spec back into `openspec/specs/<capability>/spec.md` and moves the change to `openspec/changes/archive/`.
 
 `tasks.md` templates enforce this discipline — every behavior task is preceded by a RED-failing-test task, every group ends with a code-review checkpoint, and the final group ends with a `superpowers:verification-before-completion` task. New capabilities should be added to `openspec/specs/`, not invented inside a proposal. See `openspec-superpowers-sdd-workflow.md` at the repo root for the rationale.

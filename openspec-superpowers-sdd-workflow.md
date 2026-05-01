@@ -20,13 +20,16 @@ But some problems are still obvious:
 
 ## Superpowers Fills the Gap
 
-Superpowers is a set of Claude Code skills. For an SDD workflow, three of them are especially important:
+Superpowers is a set of Claude Code skills. For an SDD workflow, four of them are especially important:
 
 - **`superpowers:brainstorming`**  
   Before you write any spec, it walks you through the idea using structured questions. It also includes Visual Companion, which can generate clickable HTML mockups that you can test in the browser. The final output is a Design Spec. **Automatically triggered by `/opsx:propose`.**
 
 - **`superpowers:test-driven-development`**  
   Drives each task as a RED → GREEN → REFACTOR cycle: write the failing test first, implement the minimum code to pass, then refactor. **Automatically triggered by `/opsx:apply`.**
+
+- **`superpowers:subagent-driven-development`**  
+  Activates with plan. Dispatches fresh subagent per task with two-stage review (spec compliance, then code quality). **Automatically triggered by `/opsx:apply` to delegate `[parallel]` task units.**
 
 - **`superpowers:requesting-code-review`**  
   After each task group is completed, it automatically runs a review pass. Issues are classified as CRITICAL / HIGH / MEDIUM / LOW, with concrete fix suggestions. Invoked at task-group checkpoints during `/opsx:apply`.

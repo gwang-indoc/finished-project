@@ -39,8 +39,9 @@ context: |
     - /opsx:propose triggers superpowers:brainstorming BEFORE artifact
       generation (see .claude/commands/opsx/propose.md).
     - /opsx:apply runs superpowers:test-driven-development at session
-      start, superpowers:subagent-driven-development to delegate
-      implementation work to subagents, and superpowers:requesting-code-review
+      start, superpowers:subagent-driven-development to dispatch a fresh
+      subagent per [parallel] task with a two-stage review (spec
+      compliance, then code quality), and superpowers:requesting-code-review
       at task-group checkpoints (see .claude/commands/opsx/apply.md).
     - tasks.md MUST scaffold TDD discipline + review checkpoints so the
       apply phase has the hooks it needs.
