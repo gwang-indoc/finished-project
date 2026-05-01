@@ -24,12 +24,14 @@ The SQLite database lives at `data/app.db` (override with `DB_PATH`). The schema
 Next.js 16 App Router on Bun, with React 19, Tailwind v4, SQLite (`bun:sqlite`), better-auth, Tiptap 3, and zod.
 
 **Request flow for an authenticated note operation:**
+
 1. Page or server action calls `auth.api.getSession({ headers: await headers() })` (see `lib/auth.ts`). On miss, redirect to `/authenticate`.
 2. Input is validated with a zod schema from `lib/validation.ts`.
 3. Title is run through `DOMPurify.sanitize(..., { ALLOWED_TAGS: [] })`; rich-text JSON is run through `sanitizeContent` → `sanitizeTipTapNode` in `lib/sanitize.ts`, which strips text marks and rewrites `href`/`src` through `sanitizeUrl` (only `http:`/`https:` survive).
 4. Persisted via `db.run(...)` / `db.query(...)` against the `notes` table. Ownership is enforced inline in SQL (`WHERE id = ? AND user_id = ?`) — there is no ORM or repository layer.
 
 **Routes (`app/`):**
+
 - `/` welcome, `/authenticate` login/signup, `/dashboard` user's notes list, `/help` help page
 - `/notes/new` create, `/notes/[id]` view, `/notes/[id]/edit` edit — each folder colocates `page.tsx`, `actions.ts` (server actions), and the client form component
 - `/p/[slug]` public read-only view, gated only on `is_public = 1` (no session check)
@@ -37,7 +39,7 @@ Next.js 16 App Router on Bun, with React 19, Tailwind v4, SQLite (`bun:sqlite`),
 
 **Sharing model:** toggling public on a note generates a `nanoid(16)` slug stored in `notes.public_slug` (unique). The public route reads by slug + `is_public = 1`. Disabling sharing flips `is_public` but keeps the slug, so re-enabling reuses the same URL.
 
-**Rich text:** `components/rich-text-editor.tsx` is a `'use client'` Tiptap editor (StarterKit) that emits JSON via `onUpdate`. `components/tiptap-renderer.tsx` is a server component that hand-renders a whitelisted subset of Tiptap node types (`paragraph`, `heading`, `bulletList`, `orderedList`, `listItem`, `codeBlock`, `horizontalRule`, `blockquote`) and marks (`bold`, `italic`, `code`). Adding a new editor feature requires updating the renderer's switch statement *and* the sanitizer's allowlist; otherwise content will be stripped on save or fall through to the default `<span>` on render.
+**Rich text:** `components/rich-text-editor.tsx` is a `'use client'` Tiptap editor (StarterKit) that emits JSON via `onUpdate`. `components/tiptap-renderer.tsx` is a server component that hand-renders a whitelisted subset of Tiptap node types (`paragraph`, `heading`, `bulletList`, `orderedList`, `listItem`, `codeBlock`, `horizontalRule`, `blockquote`) and marks (`bold`, `italic`, `code`). Adding a new editor feature requires updating the renderer's switch statement _and_ the sanitizer's allowlist; otherwise content will be stripped on save or fall through to the default `<span>` on render.
 
 ## Conventions (project-specific)
 
@@ -56,7 +58,7 @@ This project uses OpenSpec + Anthropic Superpowers skills together. The integrat
 - **`/opsx:apply`** runs `superpowers:test-driven-development` (RED → GREEN), delegates `[parallel]` units via `superpowers:subagent-driven-development` (fresh subagent per task with a two-stage review — spec compliance, then code quality), and runs `superpowers:requesting-code-review` at task-group checkpoints.
 - **`/opsx:archive`** merges the delta spec back into `openspec/specs/<capability>/spec.md` and moves the change to `openspec/changes/archive/`.
 
-`tasks.md` templates enforce this discipline — every behavior task is preceded by a RED-failing-test task, every group ends with a code-review checkpoint, and the final group ends with a `superpowers:verification-before-completion` task. New capabilities should be added to `openspec/specs/`, not invented inside a proposal. See `openspec-superpowers-sdd-workflow.md` at the repo root for the rationale.
+`tasks.md` templates enforce this discipline — every behavior task is preceded by a RED-failing-test task, every group ends with a code-review checkpoint, and the final group ends with a `superpowers:verification-before-completion` task. UI-bearing changes (anything touching `app/`, `components/`, or client-rendered behavior) must additionally include a UI smoke-test task immediately before the verification-before-completion task — either a manual `bun run dev` walkthrough with explicit URL/actions/expected outcomes, or an automated flow driven by the Playwright MCP tools (`mcp__plugin_playwright_playwright__*`). Pure backend/lib/schema/test-only changes are exempt. New capabilities should be added to `openspec/specs/`, not invented inside a proposal. See `openspec-superpowers-sdd-workflow.md` at the repo root for the rationale.
 
 ## Dev Log Practice
 
@@ -68,9 +70,11 @@ Log file path: `docs/log/YYYY-MM-DD.md` — name the file by date. If the file f
 
 ```md
 ### N. Feature Name
+
 **Commit:** `<git hash>`
 
 **Feature:**
+
 - Briefly describe what was done using bullet points
 
 **Code Review Findings, if any:**
