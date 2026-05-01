@@ -1,7 +1,15 @@
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
+import { db } from '@/lib/db';
 import { RemoveAccountForm } from './remove-account-form';
+import { ProfileForm } from './profile-form';
+
+interface ProfileRow {
+  name: string;
+  gender: string | null;
+  birthday: string | null;
+}
 
 export default async function SettingsPage() {
   const session = await auth.api.getSession({
@@ -12,9 +20,24 @@ export default async function SettingsPage() {
     redirect('/authenticate');
   }
 
+  const profile = db
+    .query<ProfileRow, [string]>('SELECT name, gender, birthday FROM user WHERE id = ?')
+    .get(session.user.id);
+
+  const defaultValues = {
+    name: profile?.name ?? session.user.name ?? '',
+    gender: profile?.gender ?? null,
+    birthday: profile?.birthday ?? null,
+  };
+
   return (
     <div className='p-8'>
       <h1 className='text-2xl font-bold mb-6'>Settings</h1>
+
+      <section className='mb-8 max-w-xl'>
+        <h2 className='text-sm font-medium text-foreground/60 mb-3'>Profile</h2>
+        <ProfileForm defaultValues={defaultValues} />
+      </section>
 
       <section className='mb-8 max-w-xl'>
         <h2 className='text-sm font-medium text-foreground/60 mb-2'>Email</h2>

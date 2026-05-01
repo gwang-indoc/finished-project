@@ -15,10 +15,23 @@ db.run(`
     email TEXT NOT NULL UNIQUE,
     emailVerified INTEGER NOT NULL DEFAULT 0,
     image TEXT,
+    gender TEXT,
+    birthday TEXT,
     createdAt TEXT NOT NULL DEFAULT (datetime('now')),
     updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
   )
 `);
+
+const userColumns = db
+  .query<{ name: string }, []>('PRAGMA table_info(user)')
+  .all()
+  .map((r) => r.name);
+if (!userColumns.includes('gender')) {
+  db.run('ALTER TABLE user ADD COLUMN gender TEXT');
+}
+if (!userColumns.includes('birthday')) {
+  db.run('ALTER TABLE user ADD COLUMN birthday TEXT');
+}
 
 db.run(`
   CREATE TABLE IF NOT EXISTS session (

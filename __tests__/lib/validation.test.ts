@@ -4,6 +4,7 @@ import {
   updateNoteSchema,
   toggleSharingSchema,
   removeAccountSchema,
+  updateProfileSchema,
 } from '@/lib/validation';
 
 describe('createNoteSchema', () => {
@@ -126,6 +127,137 @@ describe('toggleSharingSchema', () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.enable).toBe(false);
+    }
+  });
+});
+
+describe('updateProfileSchema', () => {
+  it('passes with valid input', () => {
+    const result = updateProfileSchema.safeParse({
+      name: 'Jane Doe',
+      gender: 'female',
+      birthday: '1990-06-15',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('fails when name is missing', () => {
+    const result = updateProfileSchema.safeParse({
+      gender: 'male',
+      birthday: '1990-06-15',
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.name).toBeDefined();
+    }
+  });
+
+  it('fails when gender is missing', () => {
+    const result = updateProfileSchema.safeParse({
+      name: 'Jane Doe',
+      birthday: '1990-06-15',
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.gender).toBeDefined();
+    }
+  });
+
+  it('fails when birthday is missing', () => {
+    const result = updateProfileSchema.safeParse({
+      name: 'Jane Doe',
+      gender: 'female',
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.birthday).toBeDefined();
+    }
+  });
+
+  it('fails when name is empty after trim', () => {
+    const result = updateProfileSchema.safeParse({
+      name: '   ',
+      gender: 'non-binary',
+      birthday: '1990-06-15',
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.name).toBeDefined();
+    }
+  });
+
+  it('fails when name is longer than 100 chars', () => {
+    const result = updateProfileSchema.safeParse({
+      name: 'a'.repeat(101),
+      gender: 'male',
+      birthday: '1990-06-15',
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.name).toBeDefined();
+    }
+  });
+
+  it('fails when gender is outside the allowed enum', () => {
+    const result = updateProfileSchema.safeParse({
+      name: 'Jane Doe',
+      gender: 'other',
+      birthday: '1990-06-15',
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.gender).toBeDefined();
+    }
+  });
+
+  it('fails when birthday has wrong shape', () => {
+    const result = updateProfileSchema.safeParse({
+      name: 'Jane Doe',
+      gender: 'female',
+      birthday: '1990/06/15',
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.birthday).toBeDefined();
+    }
+  });
+
+  it('fails when birthday is in the future', () => {
+    const future = new Date();
+    future.setUTCFullYear(future.getUTCFullYear() + 1);
+    const futureDateStr = future.toISOString().slice(0, 10);
+    const result = updateProfileSchema.safeParse({
+      name: 'Jane Doe',
+      gender: 'female',
+      birthday: futureDateStr,
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.birthday).toBeDefined();
+    }
+  });
+
+  it('fails when birthday is before 1900-01-01', () => {
+    const result = updateProfileSchema.safeParse({
+      name: 'Jane Doe',
+      gender: 'female',
+      birthday: '1899-12-31',
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.birthday).toBeDefined();
+    }
+  });
+
+  it('fails when birthday is calendar-invalid (2026-02-30)', () => {
+    const result = updateProfileSchema.safeParse({
+      name: 'Jane Doe',
+      gender: 'female',
+      birthday: '2026-02-30',
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.birthday).toBeDefined();
     }
   });
 });

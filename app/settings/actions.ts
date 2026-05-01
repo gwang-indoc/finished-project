@@ -2,9 +2,11 @@
 
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
+import { revalidatePath } from 'next/cache';
+import DOMPurify from 'isomorphic-dompurify';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { removeAccountSchema } from '@/lib/validation';
+import { removeAccountSchema, updateProfileSchema } from '@/lib/validation';
 
 export interface RemoveAccountState {
   error?: string;
@@ -67,4 +69,46 @@ export async function removeAccount(
   }
 
   redirect('/');
+}
+
+export interface UpdateProfileState {
+  error?: string;
+  fieldErrors?: Record<string, string>;
+  success?: boolean;
+}
+
+export async function updateProfile(
+  _prevState: UpdateProfileState,
+  formData: FormData,
+): Promise<UpdateProfileState> {
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session) {
+    redirect('/authenticate');
+  }
+
+  const parsed = updateProfileSchema.safeParse({
+    name: formData.get('name'),
+    gender: formData.get('gender'),
+    birthday: formData.get('birthday'),
+  });
+
+  if (!parsed.success) {
+    const flat = parsed.error.flatten().fieldErrors;
+    const fieldErrors: Record<string, string> = {};
+    for (const [k, v] of Object.entries(flat)) {
+      if (v && v.length > 0) fieldErrors[k] = v[0]!;
+    }
+    return { error: 'Invalid input', fieldErrors };
+  }
+
+  const cleanName = DOMPurify.sanitize(parsed.data.name, { ALLOWED_TAGS: [] });
+
+  db.run(
+    "UPDATE user SET name = ?, gender = ?, birthday = ?, updatedAt = datetime('now') WHERE id = ?",
+    [cleanName, parsed.data.gender, parsed.data.birthday, session.user.id],
+  );
+
+  revalidatePath('/settings');
+  return { success: true };
 }

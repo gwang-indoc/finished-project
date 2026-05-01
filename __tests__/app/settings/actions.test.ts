@@ -1,18 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockGetSession, mockSignOut, mockRun, mockTransactionFactory } = vi.hoisted(() => ({
-  mockGetSession: vi.fn(),
-  mockSignOut: vi.fn(),
-  mockRun: vi.fn(),
-  // db.transaction(cb) returns a function; calling it invokes cb in a SQLite
-  // transaction. Model the same shape so the action's call site works
-  // unchanged.
-  mockTransactionFactory: vi.fn(
-    (cb: (...args: unknown[]) => unknown) =>
-      (...args: unknown[]) =>
-        cb(...args),
-  ),
-}));
+const { mockGetSession, mockSignOut, mockRun, mockTransactionFactory, mockRevalidatePath } =
+  vi.hoisted(() => ({
+    mockGetSession: vi.fn(),
+    mockSignOut: vi.fn(),
+    mockRun: vi.fn(),
+    // db.transaction(cb) returns a function; calling it invokes cb in a SQLite
+    // transaction. Model the same shape so the action's call site works
+    // unchanged.
+    mockTransactionFactory: vi.fn(
+      (cb: (...args: unknown[]) => unknown) =>
+        (...args: unknown[]) =>
+          cb(...args),
+    ),
+    mockRevalidatePath: vi.fn(),
+  }));
 
 vi.mock('@/lib/db', () => ({
   db: {
@@ -34,7 +36,11 @@ vi.mock('next/headers', () => ({
   headers: async () => new Headers(),
 }));
 
-import { removeAccount } from '@/app/settings/actions';
+vi.mock('next/cache', () => ({
+  revalidatePath: mockRevalidatePath,
+}));
+
+import { removeAccount, updateProfile } from '@/app/settings/actions';
 
 const formDataWith = (confirmEmail: string) => {
   const fd = new FormData();
@@ -121,5 +127,110 @@ describe('removeAccount', () => {
 
     expect(result).toEqual({ error: 'Failed to remove account, please try again' });
     expect(mockSignOut).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('updateProfile', () => {
+  const userId = 'u1';
+  const initialState = {};
+
+  const profileFormData = (overrides: Record<string, string> = {}) => {
+    const fd = new FormData();
+    fd.set('name', overrides.name ?? 'Jane Doe');
+    fd.set('gender', overrides.gender ?? 'female');
+    fd.set('birthday', overrides.birthday ?? '1990-06-15');
+    if (overrides.userId !== undefined) fd.set('userId', overrides.userId);
+    return fd;
+  };
+
+  beforeEach(() => {
+    mockGetSession.mockReset();
+    mockSignOut.mockReset();
+    mockRun.mockReset();
+    mockRevalidatePath.mockReset();
+  });
+
+  it('without a session, redirects to /authenticate and writes nothing', async () => {
+    mockGetSession.mockResolvedValue(null);
+
+    await expect(updateProfile(initialState, profileFormData())).rejects.toThrow(/NEXT_REDIRECT/);
+
+    expect(mockRun).not.toHaveBeenCalled();
+  });
+
+  it('with valid input, updates the user row and returns { success: true }', async () => {
+    mockGetSession.mockResolvedValue({ user: { id: userId, email: 'user@example.com' } });
+
+    const result = await updateProfile(initialState, profileFormData());
+
+    expect(result).toEqual({ success: true });
+    expect(mockRun).toHaveBeenCalledTimes(1);
+    expect(mockRun).toHaveBeenCalledWith(
+      "UPDATE user SET name = ?, gender = ?, birthday = ?, updatedAt = datetime('now') WHERE id = ?",
+      ['Jane Doe', 'female', '1990-06-15', userId],
+    );
+    expect(mockRevalidatePath).toHaveBeenCalledWith('/settings');
+  });
+
+  it('with missing name, returns fieldErrors.name and writes nothing', async () => {
+    mockGetSession.mockResolvedValue({ user: { id: userId, email: 'user@example.com' } });
+
+    const result = await updateProfile(initialState, profileFormData({ name: '' }));
+
+    expect(result).toMatchObject({
+      error: expect.any(String),
+      fieldErrors: { name: expect.any(String) },
+    });
+    expect(mockRun).not.toHaveBeenCalled();
+  });
+
+  it('with gender outside enum, returns fieldErrors.gender and writes nothing', async () => {
+    mockGetSession.mockResolvedValue({ user: { id: userId, email: 'user@example.com' } });
+
+    const result = await updateProfile(initialState, profileFormData({ gender: 'other' }));
+
+    expect(result).toMatchObject({
+      error: expect.any(String),
+      fieldErrors: { gender: expect.any(String) },
+    });
+    expect(mockRun).not.toHaveBeenCalled();
+  });
+
+  it('with a future birthday, returns fieldErrors.birthday and writes nothing', async () => {
+    mockGetSession.mockResolvedValue({ user: { id: userId, email: 'user@example.com' } });
+
+    const result = await updateProfile(initialState, profileFormData({ birthday: '2099-01-01' }));
+
+    expect(result).toMatchObject({
+      error: expect.any(String),
+      fieldErrors: { birthday: expect.any(String) },
+    });
+    expect(mockRun).not.toHaveBeenCalled();
+  });
+
+  it('ignores a userId field in formData and only updates session.user.id', async () => {
+    mockGetSession.mockResolvedValue({ user: { id: userId, email: 'user@example.com' } });
+    const fd = profileFormData({ userId: 'attacker-id' });
+
+    const result = await updateProfile(initialState, fd);
+
+    expect(result).toEqual({ success: true });
+    // The fourth parameter must be the session user's id, not 'attacker-id'
+    const callArgs = mockRun.mock.calls[0] as [string, unknown[]];
+    expect(callArgs[1][3]).toBe(userId);
+  });
+
+  it('sanitizes a name containing <script> tags before persisting', async () => {
+    mockGetSession.mockResolvedValue({ user: { id: userId, email: 'user@example.com' } });
+    const fd = profileFormData({ name: 'Jane <script>alert(1)</script>' });
+
+    const result = await updateProfile(initialState, fd);
+
+    expect(result).toEqual({ success: true });
+    const callArgs = mockRun.mock.calls[0] as [string, unknown[]];
+    const persistedName = callArgs[1][0] as string;
+    expect(persistedName).not.toContain('<script>');
+    expect(persistedName).not.toContain('</script>');
+    expect(persistedName).not.toContain('<');
   });
 });
