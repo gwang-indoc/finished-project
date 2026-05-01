@@ -11,6 +11,6 @@
 
 - [x] 2.1 Run `bun run test:run` and confirm the entire suite passes (existing tests + the newly added `truncate` and `readingTime` tests).
 - [x] 2.2 Run `bun run lint` and `bun run format` to confirm the new files are clean.
-- [ ] 2.3 Append an entry to `docs/log/2026-05-01.md` (create the file if absent) following the dev-log template in `CLAUDE.md`: feature description, commit hash, code-review findings table, and tests-passed count.
+- [x] 2.3 Append an entry to `docs/log/2026-05-01.md` (create the file if absent) following the dev-log template in `CLAUDE.md`: feature description, commit hash, code-review findings table, and tests-passed count.
 - [x] 2.4 Run superpowers:verification-before-completion (bun run test:run + grep for console.log + diff review).
-- [ ] 2.Z Run superpowers:requesting-code-review on the diff for group 2; address CRITICAL/HIGH findings before moving on.
+- [x] 2.Z Run superpowers:requesting-code-review on the diff for group 2; address CRITICAL/HIGH findings before moving on.
