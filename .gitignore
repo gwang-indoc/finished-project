@@ -43,3 +43,4 @@ test_results
 
 # local tooling / scratch
 .idea/
+.worktrees/
