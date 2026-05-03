@@ -10,6 +10,7 @@ Automatically stage all changes (including new files), create a commit, and push
 ## Usage
 
 This skill will:
+
 1. Run `git status` to show what will be committed
 2. Run `git add .` to stage all changes (including new files)
 3. Create a commit with a descriptive message
@@ -18,6 +19,7 @@ This skill will:
 ## Commit Message Format
 
 Follow conventional commits format:
+
 - `feat:` - New feature
 - `fix:` - Bug fix
 - `docs:` - Documentation changes
@@ -27,6 +29,7 @@ Follow conventional commits format:
 - `chore:` - Build/tool updates
 
 Example:
+
 ```
 feat: add user authentication with Google OAuth
 
@@ -56,12 +59,14 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ## Common File Patterns
 
 Files that are typically committed:
+
 - Source code: `*.java`, `*.vue`, `*.js`, `*.ts`
 - Configuration: `*.md`, `*.json`, `*.yaml`, `*.yml`
 - Database: `*.sql`
 - Documentation: `docs/**/*`, `*.md`
 
 Files that are ignored (via `.gitignore`):
+
 - Build outputs: `target/`, `dist/`, `node_modules/`
 - Environment files: `.env`, `*.env.*`
 - IDE files: `.idea/`, `.vscode/`

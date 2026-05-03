@@ -59,7 +59,7 @@ export function wordCount(input: string): number {
 
 - **A. Plain-TS implementations (no deps)** ← **selected.** Matches project style (`lib/content.ts`, `lib/sanitize.ts`, etc. all hand-rolled). Smallest install footprint. Predictable behavior we own.
 - **B. `slugify` npm package + a `word-count` package.** Rejected — adds dependencies for trivial logic, and `slugify`'s extensive locale options (`'sv'`, `'de'`, etc.) aren't needed for a smoke test or for the project's current English-only content.
-- **C. Tiptap-aware `wordCount` that walks `lib/content.ts` parsed JSON.** Rejected for *this* change — adds coupling to Tiptap node shapes and would conflate the smoke test with a real feature. Worth a separate proposal once a caller exists (e.g. a per-note word count badge in the dashboard).
+- **C. Tiptap-aware `wordCount` that walks `lib/content.ts` parsed JSON.** Rejected for _this_ change — adds coupling to Tiptap node shapes and would conflate the smoke test with a real feature. Worth a separate proposal once a caller exists (e.g. a per-note word count badge in the dashboard).
 - **D. Inline `slugify` only at the future call site.** Rejected — even one call site benefits from a tested, reusable helper. The cost of `lib/slug.ts` over an inline arrow function is one file.
 
 ## Implementation

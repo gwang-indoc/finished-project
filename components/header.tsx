@@ -19,10 +19,7 @@ export function Header({ user }: HeaderProps) {
       </Link>
       {user && (
         <div className='flex items-center gap-4'>
-          <Link
-            href='/settings'
-            className='text-sm text-foreground/60 hover:text-foreground'
-          >
+          <Link href='/settings' className='text-sm text-foreground/60 hover:text-foreground'>
             Settings
           </Link>
           <button

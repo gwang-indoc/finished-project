@@ -54,5 +54,6 @@ Position (`absolute top-4 right-6`) and routing (`/help`) are unchanged from the
 ## Verification
 
 Dev server (`bun run dev`) confirmed:
+
 - `/` returns HTTP 200 with the new icon + text rendered in the top-right corner
 - `/help` still returns HTTP 200 with no regression

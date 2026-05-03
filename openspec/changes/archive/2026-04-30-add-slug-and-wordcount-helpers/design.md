@@ -76,12 +76,12 @@ The four existing capabilities (`account-management`, `help-page`, `note-sharing
 
 ## Risks / Trade-offs
 
-| Risk | Mitigation |
-| --- | --- |
-| **All-non-ASCII strings collapse to `''` and a caller forgets to handle that case, producing an empty slug somewhere user-visible.** | Spec scenarios explicitly cover `slugify('你好') === ''`. Tests will lock the behavior. Future caller proposals will need to specify their fallback. |
-| **A future caller that needs Tiptap-aware word counts uses `wordCount` on stringified JSON and gets nonsense numbers.** | Spec scenarios pin `wordCount`'s contract to plain text. The `text-utilities` capability is the right place to add a `wordCountTiptap` requirement when a caller appears, with its own scenario covering Tiptap node walking. |
-| **The smoke test produces a `tasks.md` without `[parallel]` markers, masking a bug in the new `config.yaml` rule.** | Verification step in tasks.md (and in the brainstorming spec) explicitly checks for the markers. If absent, the rule itself needs adjustment — file a follow-up rather than silently shipping. |
-| **`String.prototype.normalize('NFD')` runtime cost on very long inputs.** | Negligible at note-title scale (typical ≤ 200 chars). If a caller ever passes a multi-MB string, that caller is the wrong place; document `slugify` as title-grade input. Not a real risk for current callers. |
+| Risk                                                                                                                                 | Mitigation                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **All-non-ASCII strings collapse to `''` and a caller forgets to handle that case, producing an empty slug somewhere user-visible.** | Spec scenarios explicitly cover `slugify('你好') === ''`. Tests will lock the behavior. Future caller proposals will need to specify their fallback.                                                                          |
+| **A future caller that needs Tiptap-aware word counts uses `wordCount` on stringified JSON and gets nonsense numbers.**              | Spec scenarios pin `wordCount`'s contract to plain text. The `text-utilities` capability is the right place to add a `wordCountTiptap` requirement when a caller appears, with its own scenario covering Tiptap node walking. |
+| **The smoke test produces a `tasks.md` without `[parallel]` markers, masking a bug in the new `config.yaml` rule.**                  | Verification step in tasks.md (and in the brainstorming spec) explicitly checks for the markers. If absent, the rule itself needs adjustment — file a follow-up rather than silently shipping.                                |
+| **`String.prototype.normalize('NFD')` runtime cost on very long inputs.**                                                            | Negligible at note-title scale (typical ≤ 200 chars). If a caller ever passes a multi-MB string, that caller is the wrong place; document `slugify` as title-grade input. Not a real risk for current callers.                |
 
 ## Migration Plan
 

@@ -44,8 +44,8 @@ The order matters because `PRAGMA foreign_keys = ON` is active and the FKs lack 
 
 **Alternatives considered:**
 
-- *Add `ON DELETE CASCADE` via schema migration.* SQLite does not support `ALTER TABLE ... ADD CONSTRAINT`. The migration would require `CREATE TABLE notes_new ... ON DELETE CASCADE`, `INSERT INTO notes_new SELECT * FROM notes`, `DROP TABLE notes`, `ALTER TABLE notes_new RENAME TO notes`, repeated for `session` and `account`. The `session` and `account` tables are managed by better-auth — recreating them risks subtle drift from upstream. The explicit-deletes approach keeps everything inside the action and avoids touching better-auth-managed schema.
-- *Use a hypothetical better-auth `deleteUser` API.* better-auth ships a user-deletion plugin in some configurations but it isn't enabled here, and even if it were it wouldn't know about the `notes` table — we'd still need explicit cleanup for app-owned tables. Net-neutral complexity at best, more moving parts at worst.
+- _Add `ON DELETE CASCADE` via schema migration._ SQLite does not support `ALTER TABLE ... ADD CONSTRAINT`. The migration would require `CREATE TABLE notes_new ... ON DELETE CASCADE`, `INSERT INTO notes_new SELECT * FROM notes`, `DROP TABLE notes`, `ALTER TABLE notes_new RENAME TO notes`, repeated for `session` and `account`. The `session` and `account` tables are managed by better-auth — recreating them risks subtle drift from upstream. The explicit-deletes approach keeps everything inside the action and avoids touching better-auth-managed schema.
+- _Use a hypothetical better-auth `deleteUser` API._ better-auth ships a user-deletion plugin in some configurations but it isn't enabled here, and even if it were it wouldn't know about the `notes` table — we'd still need explicit cleanup for app-owned tables. Net-neutral complexity at best, more moving parts at worst.
 
 ### Decision 2: Confirmation by typed-email match (not password, not click-only)
 
@@ -53,9 +53,9 @@ The `RemoveAccountForm` displays the user's email and a text input. The Confirm 
 
 **Alternatives considered:**
 
-- *Password re-entry.* Reuses better-auth's password verification, but most users don't remember their password during a "delete my account" flow and would bounce off the action. Type-email is recoverable (the email is shown right above the input).
-- *Two-button confirmation modal.* Lowest friction, lowest safety. Rejected — irreversible action deserves a deliberate keystroke commitment.
-- *Type a fixed phrase like "DELETE MY ACCOUNT".* Works, but typing your own email already personalizes the moment without needing a second copy-pastable string.
+- _Password re-entry._ Reuses better-auth's password verification, but most users don't remember their password during a "delete my account" flow and would bounce off the action. Type-email is recoverable (the email is shown right above the input).
+- _Two-button confirmation modal._ Lowest friction, lowest safety. Rejected — irreversible action deserves a deliberate keystroke commitment.
+- _Type a fixed phrase like "DELETE MY ACCOUNT"._ Works, but typing your own email already personalizes the moment without needing a second copy-pastable string.
 
 ### Decision 3: New `/settings` route reachable via plain header link
 
@@ -65,9 +65,9 @@ The header gets a single new `<Link href='/settings'>Settings</Link>` rendered b
 
 **Alternatives considered:**
 
-- *Inline danger-zone on `/dashboard`.* No new route, but clutters the daily-use surface with a one-time-use destructive action. Rejected.
-- *Profile dropdown in the header.* Pattern apps grow into eventually, but unwarranted for a single new menu item. Reversible later.
-- *Settings link inside the dashboard body.* Less consistent than the global header — `/settings` should be reachable from anywhere the user is signed in.
+- _Inline danger-zone on `/dashboard`._ No new route, but clutters the daily-use surface with a one-time-use destructive action. Rejected.
+- _Profile dropdown in the header._ Pattern apps grow into eventually, but unwarranted for a single new menu item. Reversible later.
+- _Settings link inside the dashboard body._ Less consistent than the global header — `/settings` should be reachable from anywhere the user is signed in.
 
 ### Decision 4: Sign out and redirect to `/` (welcome) post-deletion
 
@@ -75,7 +75,7 @@ After the transaction commits, the action calls better-auth's `signOut` server-s
 
 **Alternative considered:**
 
-- *Redirect to `/authenticate`.* Confusing — the user just deleted their account; presenting them with a sign-in form invites the question "wait, can I sign back in?". Rejected.
+- _Redirect to `/authenticate`._ Confusing — the user just deleted their account; presenting them with a sign-in form invites the question "wait, can I sign back in?". Rejected.
 
 ### Decision 5: Trust the session for the user identity, not the form
 
@@ -93,7 +93,7 @@ The `confirmEmail` is still zod-validated at the action boundary as defense in d
 
 ## Migration Plan
 
-No data migration. Deploy by merging. Rollback by reverting the change set; users who haven't yet deleted their accounts are unaffected. Users who *have* deleted their accounts cannot be restored — the action documents this irreversibility prominently in the confirmation modal.
+No data migration. Deploy by merging. Rollback by reverting the change set; users who haven't yet deleted their accounts are unaffected. Users who _have_ deleted their accounts cannot be restored — the action documents this irreversibility prominently in the confirmation modal.
 
 ## Open Questions
 

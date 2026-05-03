@@ -10,7 +10,7 @@
 ```tsx
 const [origin, setOrigin] = useState('');
 useEffect(() => {
-  setOrigin(window.location.origin);  // ← react-hooks/set-state-in-effect
+  setOrigin(window.location.origin); // ← react-hooks/set-state-in-effect
 }, []);
 ```
 
@@ -29,9 +29,9 @@ import { useActionState, useState, useSyncExternalStore } from 'react';
 
 // inside the component:
 const origin = useSyncExternalStore(
-  () => () => {},                  // no subscription — origin does not change
-  () => window.location.origin,    // client snapshot
-  () => '',                        // server snapshot
+  () => () => {}, // no subscription — origin does not change
+  () => window.location.origin, // client snapshot
+  () => '', // server snapshot
 );
 ```
 

@@ -40,9 +40,9 @@ Replace the `useState` + `useEffect` pair with:
 
 ```tsx
 const origin = useSyncExternalStore(
-  () => () => {},                  // subscribe — no-op
-  () => window.location.origin,    // getSnapshot — client
-  () => '',                        // getServerSnapshot — server
+  () => () => {}, // subscribe — no-op
+  () => window.location.origin, // getSnapshot — client
+  () => '', // getServerSnapshot — server
 );
 ```
 
@@ -50,20 +50,20 @@ const origin = useSyncExternalStore(
 
 **Alternatives considered (full reasoning lives in the brainstorming spec):**
 
-- *Render a relative URL, read origin only inside the copy handler.* Removes the need for `origin` during render but degrades the displayed URL from absolute to relative. Rejected on UX grounds.
-- *`// eslint-disable-next-line react-hooks/set-state-in-effect`.* Suppresses a rule that exists for a real reason. Rejected as a code smell when a clean fix exists.
-- *Lazy `useState` initializer with a `typeof window` guard.* Avoids the `useEffect` but produces SSR-vs-CSR divergence (server `''`, client `"https://…"`) and triggers React 18 hydration warnings. Rejected.
+- _Render a relative URL, read origin only inside the copy handler._ Removes the need for `origin` during render but degrades the displayed URL from absolute to relative. Rejected on UX grounds.
+- _`// eslint-disable-next-line react-hooks/set-state-in-effect`._ Suppresses a rule that exists for a real reason. Rejected as a code smell when a clean fix exists.
+- _Lazy `useState` initializer with a `typeof window` guard._ Avoids the `useEffect` but produces SSR-vs-CSR divergence (server `''`, client `"https://…"`) and triggers React 18 hydration warnings. Rejected.
 
 ### Decision 2: Capture the SSR-safe rendering as a new minimal `note-sharing` capability
 
 The spec delta introduces one ADDED requirement under a new `note-sharing` capability: "Public note URL renders without SSR/CSR hydration mismatch", with two scenarios — one for the pre-hydration state (URL hidden), one for the post-hydration state (absolute URL visible).
 
-The motivation is twofold: (a) OpenSpec requires at least one delta per change, so a pure refactor needs *some* spec surface, and (b) the SSR-safe contract is exactly what the refactor preserves and is genuinely worth recording so a future developer cannot regress it back into a hydration-mismatch pattern under a different lint rule.
+The motivation is twofold: (a) OpenSpec requires at least one delta per change, so a pure refactor needs _some_ spec surface, and (b) the SSR-safe contract is exactly what the refactor preserves and is genuinely worth recording so a future developer cannot regress it back into a hydration-mismatch pattern under a different lint rule.
 
 **Alternatives considered:**
 
-- *Add a "lint cleanliness" capability.* Artificial — lint rules are tooling, not user-facing requirements. Rejected.
-- *Cover the entire note-sharing surface (toggle, public route, server action) in this spec.* Tempting (the capability is currently undocumented), but scope creep for a lint fix. Rejected — a focused minimal spec is honest about what *this* change is preserving; broadening coverage belongs in its own change.
+- _Add a "lint cleanliness" capability._ Artificial — lint rules are tooling, not user-facing requirements. Rejected.
+- _Cover the entire note-sharing surface (toggle, public route, server action) in this spec._ Tempting (the capability is currently undocumented), but scope creep for a lint fix. Rejected — a focused minimal spec is honest about what _this_ change is preserving; broadening coverage belongs in its own change.
 
 ### Decision 3: No new component tests
 
@@ -71,8 +71,8 @@ The refactor preserves observable behavior. The two scenarios in the new spec ar
 
 **Alternatives considered:**
 
-- *Add a `react-testing-library` test asserting the URL appears after hydration.* Would require a fixture for the `useActionState` initial state, mocking `window.location.origin`, and async act/await semantics. Disproportionate for a refactor. Rejected — but flagged in the proposal as a possible follow-up change.
-- *Add a regression test that imports the component and asserts on the file's source (e.g., that `useSyncExternalStore` is imported).* Tests implementation, not behavior. Rejected.
+- _Add a `react-testing-library` test asserting the URL appears after hydration._ Would require a fixture for the `useActionState` initial state, mocking `window.location.origin`, and async act/await semantics. Disproportionate for a refactor. Rejected — but flagged in the proposal as a possible follow-up change.
+- _Add a regression test that imports the component and asserts on the file's source (e.g., that `useSyncExternalStore` is imported)._ Tests implementation, not behavior. Rejected.
 
 ## Risks / Trade-offs
 

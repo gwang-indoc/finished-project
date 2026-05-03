@@ -15,8 +15,7 @@ But some problems are still obvious:
 3. **`tasks.md` describes the “what,” not the “how.”**  
    `tasks.md` is a checklist. It does not contain an implementation plan for each task. The AI can fill in the blanks by itself, but the result is unstable. Sometimes it gets it right; sometimes it goes off track. Some tasks may even be quietly skipped.
 
-4. **No testing discipline.**  
-
+4. **No testing discipline.**
 
 ## Superpowers Fills the Gap
 
@@ -37,8 +36,6 @@ Superpowers is a set of Claude Code skills. For an SDD workflow, four of them ar
 OpenSpec manages change tracking and long-term spec accumulation. Superpowers manages upfront design, execution discipline, and review. They work at different layers, so they do not conflict. They can complement each other.
 
 ## What the SDLC Looks Like When Combining Both Tools
-
-
 
 ### Project Initialization, One Time Only
 

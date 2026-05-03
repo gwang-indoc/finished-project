@@ -13,7 +13,7 @@ There is no existing settings page, no profile menu, and no FK cascade behavior 
 
 ### Decision 1: Hard delete with cascade — no soft delete, no orphaned public notes
 
-When a user removes their account, the system permanently deletes their `user` row, all of their `notes` (private *and* public), all of their `session` rows, and all of their `account` rows in a single transaction. Public URLs (`/p/<slug>`) immediately return 404. There is no recovery window.
+When a user removes their account, the system permanently deletes their `user` row, all of their `notes` (private _and_ public), all of their `session` rows, and all of their `account` rows in a single transaction. Public URLs (`/p/<slug>`) immediately return 404. There is no recovery window.
 
 **Alternatives considered:**
 
@@ -64,13 +64,13 @@ After the transaction commits, the action clears the session (better-auth `signO
 
 Five files changed/created:
 
-| File | Status | Purpose |
-|---|---|---|
-| `app/settings/page.tsx` | new (Server Component) | Auth-gates via `auth.api.getSession`; redirects to `/authenticate` on miss; renders the user's email and the Remove account form |
-| `app/settings/actions.ts` | new (Server Action) | `removeAccount` action: zod-validates the typed email, asserts it matches `session.user.email`, runs the four-table delete in a transaction, signs out, redirects to `/` |
-| `app/settings/remove-account-form.tsx` | new (`'use client'`) | Owns the typed-email input + Confirm button (disabled until match); calls the server action via `useActionState` for inline error rendering |
-| `components/header.tsx` | edit (~3 lines) | Add `<Link href='/settings'>Settings</Link>` between brand and Logout, gated on the same `user` prop |
-| `lib/validation.ts` | edit (~5 lines) | Add `removeAccountSchema = z.object({ confirmEmail: z.string().email().max(254) })` |
+| File                                   | Status                 | Purpose                                                                                                                                                                  |
+| -------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `app/settings/page.tsx`                | new (Server Component) | Auth-gates via `auth.api.getSession`; redirects to `/authenticate` on miss; renders the user's email and the Remove account form                                         |
+| `app/settings/actions.ts`              | new (Server Action)    | `removeAccount` action: zod-validates the typed email, asserts it matches `session.user.email`, runs the four-table delete in a transaction, signs out, redirects to `/` |
+| `app/settings/remove-account-form.tsx` | new (`'use client'`)   | Owns the typed-email input + Confirm button (disabled until match); calls the server action via `useActionState` for inline error rendering                              |
+| `components/header.tsx`                | edit (~3 lines)        | Add `<Link href='/settings'>Settings</Link>` between brand and Logout, gated on the same `user` prop                                                                     |
+| `lib/validation.ts`                    | edit (~5 lines)        | Add `removeAccountSchema = z.object({ confirmEmail: z.string().email().max(254) })`                                                                                      |
 
 No schema migration. No new dependencies.
 

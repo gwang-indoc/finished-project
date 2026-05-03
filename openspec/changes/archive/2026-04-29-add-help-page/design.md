@@ -5,10 +5,12 @@ The app is a Next.js 15 note-taking application. The welcome page (`app/page.tsx
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Add a static `/help` page with feature documentation accessible without login.
 - Add a Help link on the welcome page pointing to `/help`.
 
 **Non-Goals:**
+
 - In-app contextual tooltips or onboarding flows.
 - Help content for authenticated users (e.g., dashboard-level help).
 - CMS-driven or dynamic help content.

@@ -1,6 +1,32 @@
-# CLAUDE.md
+# Growing App - Claude Code Guide
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> **Context Recovery**: Read this first when resuming work.
+> **Project Root**: `<your-clone-of-finished-project>/`
+
+## Behavior Guidelines
+
+**Think before coding.** State assumptions explicitly. If multiple interpretations exist, present them — don't pick silently. If something is unclear, stop and ask before implementing.
+
+**Simplicity first.** Write the minimum code that solves the problem. No speculative features, no abstractions for single-use code, no "flexibility" that wasn't requested. If it can be 50 lines, don't write 200.
+
+**Surgical changes.** Touch only what the request requires. Don't "improve" adjacent code, comments, or formatting. Match existing style. Remove only imports/variables made unused by _your_ changes — not pre-existing dead code.
+
+**Goal-driven execution.** Transform tasks into verifiable goals before starting:
+
+- "Fix the bug" → write a test that reproduces it, then make it pass
+- "Add validation" → write tests for invalid inputs, then make them pass
+- "Refactor X" → ensure tests pass before and after
+
+---
+
+## Critical Guardrails
+
+### 🚨 NEVER Do This
+
+1. **NEVER commit `backend/.env` or `.env`** — Contains DB credentials, already in `.gitignore`
+2. **NEVER run backend without sourcing `.env`** — Use `./backend/start.sh`, not `mvn spring-boot:run` directly
+
+---
 
 ## Commands
 
@@ -49,16 +75,6 @@ Next.js 16 App Router on Bun, with React 19, Tailwind v4, SQLite (`bun:sqlite`),
 - **Colocate** `page.tsx` + `actions.ts` + form component in the same route folder.
 - **Tailwind v4 semantic tokens**: prefer `text-foreground/60`, `border-border` over raw color classes.
 - **Tests** live in `__tests__/` mirroring source layout (`__tests__/lib/sanitize.test.ts` ↔ `lib/sanitize.ts`). The vitest setup (`vitest.setup.ts`) registers jest-dom matchers and `afterEach(cleanup)` for React Testing Library.
-
-## Spec-driven workflow
-
-This project uses OpenSpec + Anthropic Superpowers skills together. The integration is configured in `openspec/config.yaml` and the slash commands in `.claude/commands/opsx/`:
-
-- **`/opsx:propose`** runs `superpowers:brainstorming` first, then generates `proposal.md`, `design.md`, and `tasks.md` under `openspec/changes/<id>/`. UI-bearing proposals must reference a brainstorming spec under `docs/superpowers/specs/`.
-- **`/opsx:apply`** runs `superpowers:test-driven-development` (RED → GREEN), delegates `[parallel]` units via `superpowers:subagent-driven-development` (fresh subagent per task with a two-stage review — spec compliance, then code quality), and runs `superpowers:requesting-code-review` at task-group checkpoints.
-- **`/opsx:archive`** merges the delta spec back into `openspec/specs/<capability>/spec.md` and moves the change to `openspec/changes/archive/`.
-
-`tasks.md` templates enforce this discipline — every behavior task is preceded by a RED-failing-test task, every group ends with a code-review checkpoint, and the final group ends with a `superpowers:verification-before-completion` task. UI-bearing changes (anything touching `app/`, `components/`, or client-rendered behavior) must additionally include a UI smoke-test task immediately before the verification-before-completion task — either a manual `bun run dev` walkthrough with explicit URL/actions/expected outcomes, or an automated flow driven by the Playwright MCP tools (`mcp__plugin_playwright_playwright__*`). Pure backend/lib/schema/test-only changes are exempt. New capabilities should be added to `openspec/specs/`, not invented inside a proposal. See `openspec-superpowers-sdd-workflow.md` at the repo root for the rationale.
 
 ## Dev Log Practice
 

@@ -13,6 +13,7 @@
   - Tampered `confirmEmail` matching a different user's email → action returns `{ error: 'Email did not match' }`; no `db.run` calls.
 
   Run `bun run test:run __tests__/app/settings/actions.test.ts` and confirm RED before the action exists, GREEN after.
+
 - [x] 2.2 GREEN — create `app/settings/actions.ts` with the `removeAccount` server action. Per `design.md` Decision 1, run the four `DELETE` statements inside `db.transaction(...)` in order: `notes` → `session` → `account` → `user`. Per Decision 5, use `session.user.id` for every SQL parameter (never `confirmEmail`). After the transaction commits, sign out via better-auth's API (fall back to clearing the session cookie via `cookies()` only if the API surface is unavailable — leave a one-line comment noting the fallback is a fallback). Then `redirect('/')` per Decision 4. Re-run the test file and confirm all four cases pass.
 - [x] 2.3 Run `superpowers:requesting-code-review` on the diff for group 2; address CRITICAL/HIGH findings before moving on.
 

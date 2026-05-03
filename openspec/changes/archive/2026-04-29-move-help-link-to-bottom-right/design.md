@@ -28,8 +28,8 @@ Change `<div className='absolute top-4 right-6'>` to `<div className='absolute r
 
 **Alternatives considered:**
 
-- *Extract a `HelpCornerLink` component.* Would be premature — there's exactly one usage and no second site asking for it. YAGNI.
-- *Use a layout-level slot (e.g., a corner-anchored helper rendered in `app/layout.tsx`).* Out of scope: the Help link is welcome-page-specific today, and a layout-level slot expands the blast radius for a positional tweak.
+- _Extract a `HelpCornerLink` component._ Would be premature — there's exactly one usage and no second site asking for it. YAGNI.
+- _Use a layout-level slot (e.g., a corner-anchored helper rendered in `app/layout.tsx`)._ Out of scope: the Help link is welcome-page-specific today, and a layout-level slot expands the blast radius for a positional tweak.
 
 The class-swap fits the existing pattern — the welcome page is already a flat, single-file Server Component with absolute-positioned children. Adding indirection for one element makes the file harder to scan, not easier.
 
@@ -41,8 +41,8 @@ The delta uses `RENAMED Requirements` (FROM/TO) for the header change followed b
 
 **Alternatives considered:**
 
-- *REMOVED + ADDED.* Cleaner-looking delta, but loses the lineage between the old and new requirement at archive time. Since this is the same capability being repositioned (not deprecated and reintroduced), RENAMED + MODIFIED is the correct shape.
-- *Keep the requirement name generic ("…in a designated corner") and only MODIFY the body.* Tempting but vague — capability specs in this project encode the meaningful positional choice in the requirement name (the "top-right corner" naming was deliberate), and a generic name hides the regression we're trying to prevent.
+- _REMOVED + ADDED._ Cleaner-looking delta, but loses the lineage between the old and new requirement at archive time. Since this is the same capability being repositioned (not deprecated and reintroduced), RENAMED + MODIFIED is the correct shape.
+- _Keep the requirement name generic ("…in a designated corner") and only MODIFY the body._ Tempting but vague — capability specs in this project encode the meaningful positional choice in the requirement name (the "top-right corner" naming was deliberate), and a generic name hides the regression we're trying to prevent.
 
 ### Decision 3: No new tests
 
@@ -50,7 +50,7 @@ The existing welcome-page scenarios cover both required behaviors (Help link is 
 
 **Alternatives considered:**
 
-- *Add a frontend RTL test asserting the link is positioned at the bottom-right.* Tailwind classnames are not testable through DOM assertions in a useful way (you'd be asserting `bottom-4` is in `className`, which restates the implementation). Skipped.
+- _Add a frontend RTL test asserting the link is positioned at the bottom-right._ Tailwind classnames are not testable through DOM assertions in a useful way (you'd be asserting `bottom-4` is in `className`, which restates the implementation). Skipped.
 
 ## Risks / Trade-offs
 
