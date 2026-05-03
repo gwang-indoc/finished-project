@@ -45,3 +45,4 @@ test_results
 .idea/
 .worktrees/
 .superpowers/
+.playwright-mcp/

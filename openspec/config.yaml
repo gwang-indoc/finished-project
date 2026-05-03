@@ -52,7 +52,7 @@ rules:
   proposal:
     - 'Always include a Non-Goals (or Out-of-Scope) section.'
     - 'Capabilities section MUST list which existing capability is modified. Look in openspec/specs/ first; do not invent capability names.'
-    - 'If the change has visual/UX surface, mention that brainstorming has already produced a design spec under docs/superpowers/specs/.'
+    - 'Every proposal must reference the brainstorming spec produced under docs/superpowers/specs/. /opsx:propose ALWAYS runs superpowers:brainstorming first regardless of whether the change has UI surface, so the spec exists for every change.'
 
   design:
     - 'Reference the brainstorming spec doc under docs/superpowers/specs/ as a primary input when one exists for this change.'
@@ -65,5 +65,5 @@ rules:
     - "Across groups, when 2+ '## N' groups touch disjoint files with no cross-group read/write dependency, prepend tasks.md (above '## 1') with a top-level line: 'Invoke superpowers:subagent-driven-development to dispatch groups <comma-separated list> in parallel; one subagent per group.' Only add this when group independence is genuinely true; default is sequential. The per-group review checkpoint (N.Z) still applies inside each parallel group."
     - "Each '## N' task group MUST end with a checkpoint task: '- [ ] N.Z Run superpowers:requesting-code-review on the diff for group N; address CRITICAL/HIGH findings before moving on'."
     - "The final task group MUST include a verification task: '- [ ] M.K Run superpowers:verification-before-completion (bun run test:run + grep for console.log + diff review)'."
-    - "If the change touches the UI surface (any route under app/, any component under components/, or any client-rendered behavior), the final task group MUST include a UI verification task placed IMMEDIATELY BEFORE the verification-before-completion task. Pattern: '- [ ] M.K UI smoke test — `bun run dev`, then <explicit URL + user actions + expected outcomes>' for a manual walkthrough, OR '- [ ] M.K Automated UI smoke test via mcp__plugin_playwright_playwright__* tools — <explicit flow>' when the runner can drive a headless browser. Pure backend/lib/schema/test-only changes are exempt."
+    - "If the change touches the UI surface (any route under app/, any component under components/, or any client-rendered behavior), the final task group MUST include an E2E test task placed IMMEDIATELY BEFORE the verification-before-completion task. Pattern: '- [ ] M.K E2E test — `bun run dev`, then <explicit URL + user actions + expected outcomes>' for a manual end-to-end walkthrough, OR '- [ ] M.K Automated E2E test via mcp__plugin_playwright_playwright__* tools — <explicit flow>' when the runner can drive a headless browser. Pure backend/lib/schema/test-only changes are exempt."
     - "Tasks SHOULD explicitly name the superpowers skill to invoke when relevant (e.g., 'Invoke superpowers:test-driven-development to scaffold tests for the new service method')."
