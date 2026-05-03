@@ -7,6 +7,7 @@ interface DefaultValues {
   name: string;
   gender: string | null;
   birthday: string | null;
+  occupation: string | null;
 }
 
 interface ProfileFormViewProps {
@@ -79,6 +80,24 @@ export function ProfileFormView({
         {state.fieldErrors?.birthday && (
           <p role='alert' className='text-red-600 text-sm mt-1'>
             {state.fieldErrors.birthday}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor='profile-occupation' className='block text-sm font-medium mb-1'>
+          Occupation
+        </label>
+        <input
+          id='profile-occupation'
+          type='text'
+          name='occupation'
+          defaultValue={defaultValues.occupation ?? ''}
+          className='w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-foreground/30 bg-background'
+        />
+        {state.fieldErrors?.occupation && (
+          <p role='alert' className='text-red-600 text-sm mt-1'>
+            {state.fieldErrors.occupation}
           </p>
         )}
       </div>

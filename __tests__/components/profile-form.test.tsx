@@ -6,7 +6,7 @@ vi.mock('@/app/settings/actions', () => ({
   updateProfile: vi.fn(),
 }));
 
-const defaultValues = { name: 'Jane', gender: 'female', birthday: '1990-06-15' };
+const defaultValues = { name: 'Jane', gender: 'female', birthday: '1990-06-15', occupation: 'Engineer' };
 const emptyState = {};
 const noopAction = async () => {};
 
@@ -75,5 +75,59 @@ describe('ProfileFormView', () => {
 
     const button = screen.getByRole('button', { name: /saving/i });
     expect(button).toBeDisabled();
+  });
+
+  it('renders an occupation input with the correct name attribute', () => {
+    render(
+      <ProfileFormView
+        defaultValues={defaultValues}
+        state={emptyState}
+        isPending={false}
+        formAction={noopAction}
+      />,
+    );
+    const input = screen.getByLabelText('Occupation') as HTMLInputElement;
+    expect(input).toBeInTheDocument();
+    expect(input.name).toBe('occupation');
+  });
+
+  it('prefills occupation with defaultValues.occupation', () => {
+    render(
+      <ProfileFormView
+        defaultValues={defaultValues}
+        state={emptyState}
+        isPending={false}
+        formAction={noopAction}
+      />,
+    );
+    const input = screen.getByLabelText('Occupation') as HTMLInputElement;
+    expect(input.value).toBe('Engineer');
+  });
+
+  it('renders empty occupation input when defaultValues.occupation is null', () => {
+    render(
+      <ProfileFormView
+        defaultValues={{ ...defaultValues, occupation: null }}
+        state={emptyState}
+        isPending={false}
+        formAction={noopAction}
+      />,
+    );
+    const input = screen.getByLabelText('Occupation') as HTMLInputElement;
+    expect(input.value).toBe('');
+  });
+
+  it('shows inline occupation error when state.fieldErrors.occupation is set', () => {
+    render(
+      <ProfileFormView
+        defaultValues={defaultValues}
+        state={{ fieldErrors: { occupation: 'Occupation is too long' } }}
+        isPending={false}
+        formAction={noopAction}
+      />,
+    );
+    const alerts = screen.getAllByRole('alert');
+    const alertTexts = alerts.map((a) => a.textContent);
+    expect(alertTexts).toContain('Occupation is too long');
   });
 });

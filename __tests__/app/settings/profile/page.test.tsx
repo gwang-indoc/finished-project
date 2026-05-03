@@ -107,4 +107,40 @@ describe('ProfilePage', () => {
     await expect(ProfilePage()).rejects.toThrow('__redirect__:/authenticate');
     expect(mockRedirect).toHaveBeenCalledWith('/authenticate');
   });
+
+  it('passes occupation from DB as defaultValues.occupation to ProfileForm', async () => {
+    mockGetSession.mockResolvedValue({
+      user: { id: 'u1', email: 'jane@example.com', name: 'Jane' },
+    });
+    mockGet.mockReturnValue({
+      name: 'Jane',
+      gender: 'female',
+      birthday: '1990-06-15',
+      occupation: 'Software Engineer',
+    });
+
+    const ui = await ProfilePage();
+    render(ui);
+
+    const occupationInput = screen.getByLabelText('Occupation') as HTMLInputElement;
+    expect(occupationInput.value).toBe('Software Engineer');
+  });
+
+  it('passes null occupation when DB row has no occupation', async () => {
+    mockGetSession.mockResolvedValue({
+      user: { id: 'u1', email: 'jane@example.com', name: 'Jane' },
+    });
+    mockGet.mockReturnValue({
+      name: 'Jane',
+      gender: 'female',
+      birthday: '1990-06-15',
+      occupation: null,
+    });
+
+    const ui = await ProfilePage();
+    render(ui);
+
+    const occupationInput = screen.getByLabelText('Occupation') as HTMLInputElement;
+    expect(occupationInput.value).toBe('');
+  });
 });

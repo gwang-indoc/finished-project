@@ -134,11 +134,12 @@ describe('updateProfile', () => {
   const userId = 'u1';
   const initialState = {};
 
-  const profileFormData = (overrides: Record<string, string> = {}) => {
+  const profileFormData = (overrides: Record<string, string | undefined> = {}) => {
     const fd = new FormData();
     fd.set('name', overrides.name ?? 'Jane Doe');
     fd.set('gender', overrides.gender ?? 'female');
     fd.set('birthday', overrides.birthday ?? '1990-06-15');
+    if (overrides.occupation !== undefined) fd.set('occupation', overrides.occupation);
     if (overrides.userId !== undefined) fd.set('userId', overrides.userId);
     return fd;
   };
@@ -166,8 +167,8 @@ describe('updateProfile', () => {
     expect(result).toEqual({ success: true });
     expect(mockRun).toHaveBeenCalledTimes(1);
     expect(mockRun).toHaveBeenCalledWith(
-      "UPDATE user SET name = ?, gender = ?, birthday = ?, updatedAt = datetime('now') WHERE id = ?",
-      ['Jane Doe', 'female', '1990-06-15', userId],
+      "UPDATE user SET name = ?, gender = ?, birthday = ?, occupation = ?, updatedAt = datetime('now') WHERE id = ?",
+      ['Jane Doe', 'female', '1990-06-15', null, userId],
     );
     expect(mockRevalidatePath).toHaveBeenCalledWith('/settings');
   });
@@ -215,9 +216,9 @@ describe('updateProfile', () => {
     const result = await updateProfile(initialState, fd);
 
     expect(result).toEqual({ success: true });
-    // The fourth parameter must be the session user's id, not 'attacker-id'
+    // The fifth parameter must be the session user's id, not 'attacker-id'
     const callArgs = mockRun.mock.calls[0] as [string, unknown[]];
-    expect(callArgs[1][3]).toBe(userId);
+    expect(callArgs[1][4]).toBe(userId);
   });
 
   it('sanitizes a name containing <script> tags before persisting', async () => {
@@ -232,5 +233,52 @@ describe('updateProfile', () => {
     expect(persistedName).not.toContain('<script>');
     expect(persistedName).not.toContain('</script>');
     expect(persistedName).not.toContain('<');
+  });
+
+  it('with valid occupation, includes occupation in the UPDATE call', async () => {
+    mockGetSession.mockResolvedValue({ user: { id: userId, email: 'user@example.com' } });
+
+    const result = await updateProfile(initialState, profileFormData({ occupation: 'Software Engineer' }));
+
+    expect(result).toEqual({ success: true });
+    const callArgs = mockRun.mock.calls[0] as [string, unknown[]];
+    expect(callArgs[0]).toContain('occupation');
+    expect(callArgs[1]).toContain('Software Engineer');
+  });
+
+  it('with empty occupation, stores NULL in the UPDATE call', async () => {
+    mockGetSession.mockResolvedValue({ user: { id: userId, email: 'user@example.com' } });
+
+    const result = await updateProfile(initialState, profileFormData({ occupation: '' }));
+
+    expect(result).toEqual({ success: true });
+    const callArgs = mockRun.mock.calls[0] as [string, unknown[]];
+    expect(callArgs[1]).toContain(null);
+  });
+
+  it('sanitizes occupation by stripping HTML tags before persisting', async () => {
+    mockGetSession.mockResolvedValue({ user: { id: userId, email: 'user@example.com' } });
+    const fd = profileFormData({ occupation: 'Engineer <script>alert(1)</script>' });
+
+    const result = await updateProfile(initialState, fd);
+
+    expect(result).toEqual({ success: true });
+    const callArgs = mockRun.mock.calls[0] as [string, unknown[]];
+    const persistedOccupation = callArgs[1].find(
+      (v) => typeof v === 'string' && v.includes('Engineer') && !v.includes('<script>'),
+    );
+    expect(persistedOccupation).toBeDefined();
+  });
+
+  it('with occupation over 100 chars, returns fieldErrors.occupation and writes nothing', async () => {
+    mockGetSession.mockResolvedValue({ user: { id: userId, email: 'user@example.com' } });
+
+    const result = await updateProfile(initialState, profileFormData({ occupation: 'a'.repeat(101) }));
+
+    expect(result).toMatchObject({
+      error: expect.any(String),
+      fieldErrors: { occupation: expect.any(String) },
+    });
+    expect(mockRun).not.toHaveBeenCalled();
   });
 });

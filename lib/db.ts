@@ -17,6 +17,7 @@ db.run(`
     image TEXT,
     gender TEXT,
     birthday TEXT,
+    occupation TEXT,
     createdAt TEXT NOT NULL DEFAULT (datetime('now')),
     updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
   )
@@ -31,6 +32,9 @@ if (!userColumns.includes('gender')) {
 }
 if (!userColumns.includes('birthday')) {
   db.run('ALTER TABLE user ADD COLUMN birthday TEXT');
+}
+if (!userColumns.includes('occupation')) {
+  db.run('ALTER TABLE user ADD COLUMN occupation TEXT');
 }
 
 db.run(`

@@ -91,6 +91,7 @@ export async function updateProfile(
     name: formData.get('name'),
     gender: formData.get('gender'),
     birthday: formData.get('birthday'),
+    occupation: formData.get('occupation') ?? undefined,
   });
 
   if (!parsed.success) {
@@ -103,10 +104,13 @@ export async function updateProfile(
   }
 
   const cleanName = DOMPurify.sanitize(parsed.data.name, { ALLOWED_TAGS: [] });
+  const cleanOccupation = parsed.data.occupation
+    ? DOMPurify.sanitize(parsed.data.occupation, { ALLOWED_TAGS: [] }) || null
+    : null;
 
   db.run(
-    "UPDATE user SET name = ?, gender = ?, birthday = ?, updatedAt = datetime('now') WHERE id = ?",
-    [cleanName, parsed.data.gender, parsed.data.birthday, session.user.id],
+    "UPDATE user SET name = ?, gender = ?, birthday = ?, occupation = ?, updatedAt = datetime('now') WHERE id = ?",
+    [cleanName, parsed.data.gender, parsed.data.birthday, cleanOccupation, session.user.id],
   );
 
   revalidatePath('/settings');

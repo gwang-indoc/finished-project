@@ -260,4 +260,49 @@ describe('updateProfileSchema', () => {
       expect(result.error.flatten().fieldErrors.birthday).toBeDefined();
     }
   });
+
+  it('passes when occupation is omitted', () => {
+    const result = updateProfileSchema.safeParse({
+      name: 'Jane Doe',
+      gender: 'female',
+      birthday: '1990-06-15',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('passes when occupation is an empty string (treated as optional)', () => {
+    const result = updateProfileSchema.safeParse({
+      name: 'Jane Doe',
+      gender: 'female',
+      birthday: '1990-06-15',
+      occupation: '',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('fails when occupation exceeds 100 characters', () => {
+    const result = updateProfileSchema.safeParse({
+      name: 'Jane Doe',
+      gender: 'female',
+      birthday: '1990-06-15',
+      occupation: 'a'.repeat(101),
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.occupation).toContain('Occupation is too long');
+    }
+  });
+
+  it('trims whitespace from occupation', () => {
+    const result = updateProfileSchema.safeParse({
+      name: 'Jane Doe',
+      gender: 'female',
+      birthday: '1990-06-15',
+      occupation: '  Engineer  ',
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.occupation).toBe('Engineer');
+    }
+  });
 });

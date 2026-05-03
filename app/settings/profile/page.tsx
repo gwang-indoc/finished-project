@@ -8,6 +8,7 @@ interface ProfileRow {
   name: string;
   gender: string | null;
   birthday: string | null;
+  occupation: string | null;
 }
 
 export default async function ProfilePage() {
@@ -20,13 +21,14 @@ export default async function ProfilePage() {
   }
 
   const profile = db
-    .query<ProfileRow, [string]>('SELECT name, gender, birthday FROM user WHERE id = ?')
+    .query<ProfileRow, [string]>('SELECT name, gender, birthday, occupation FROM user WHERE id = ?')
     .get(session.user.id);
 
   const defaultValues = {
     name: profile?.name ?? session.user.name ?? '',
     gender: profile?.gender ?? null,
     birthday: profile?.birthday ?? null,
+    occupation: profile?.occupation ?? null,
   };
 
   return (
